@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Milieu v0.5 — Aethelis</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+[data-theme="dark"] {
+  --bg:#0B1623;--bg2:#132030;--bg3:#1C2E42;--bg4:#243547;
+  --bdr:#243547;--bdr2:#3D5468;
+  --tx:#F4F7F9;--tx2:#D8E2EA;--tx3:#8FA4B4;--tx4:#3D5468;
+  --card:#132030;--shad:rgba(0,0,0,.4);
+}
+[data-theme="light"] {
+  --bg:#EEF2F6;--bg2:#FFFFFF;--bg3:#F4F7FA;--bg4:#E2E8F0;
+  --bdr:#CBD5E1;--bdr2:#94A3B8;
+  --tx:#0F172A;--tx2:#1E293B;--tx3:#475569;--tx4:#CBD5E1;
+  --card:#FFFFFF;--shad:rgba(0,0,0,.08);
+}
+:root {
+  --teal:#1DBFA0;--teal2:#158F78;
+  --gr:#22C55E;--gbg:rgba(34,197,94,.12);--gbd:rgba(34,197,94,.3);
+  --am:#F59E0B;--abg:rgba(245,158,11,.12);--abd:rgba(245,158,11,.3);
+  --rd:#EF4444;--rbg:rgba(239,68,68,.12);--rbd:rgba(239,68,68,.3);
+  --off:#4B6070;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{height:100%;display:flex;flex-direction:column;background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans',sans-serif;border-top:3px solid var(--teal);}
+
+/* ── TOP BARS ── */
+#sim-banner{background:var(--abg);border-bottom:1px solid var(--abd);padding:6px 16px;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--am);flex-shrink:0;}
+#sim-banner.hidden{display:none;}
+
+#summary-bar{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+#summary-bar.hidden{display:none;}
+#sb-pills{display:flex;gap:6px;flex:1;}
+.sb-pill{flex:1;display:flex;align-items:center;gap:7px;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;padding:7px 10px;cursor:pointer;min-width:0;transition:border-color .3s,background .3s;}
+.sb-pill.green{border-color:var(--gbd);background:var(--gbg);}
+.sb-pill.amber{border-color:var(--abd);background:var(--abg);}
+.sb-pill.red{border-color:var(--rbd);background:var(--rbg);}
+.sb-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+.sb-dot.green{background:var(--gr);animation:pg 2.5s ease infinite;}
+.sb-dot.amber{background:var(--am);animation:pa 2.5s ease infinite;}
+.sb-dot.red{background:var(--rd);animation:pr 1.8s ease infinite;}
+.sb-dot.offl{background:var(--off);}
+.sb-name{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sb-temp{font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;white-space:nowrap;}
+.sb-temp.green{color:var(--gr);}.sb-temp.amber{color:var(--am);}.sb-temp.red{color:var(--rd);}.sb-temp.neutral{color:var(--tx3);}
+#sb-sys{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;padding:5px 10px;border-radius:6px;white-space:nowrap;}
+#sb-sys.green{background:var(--gbg);color:var(--gr);border:1px solid var(--gbd);}
+#sb-sys.amber{background:var(--abg);color:var(--am);border:1px solid var(--abd);}
+#sb-sys.red{background:var(--rbg);color:var(--rd);border:1px solid var(--rbd);}
+
+#rot-bar{display:flex;align-items:center;gap:10px;padding:7px 12px;background:var(--bg2);border-bottom:1px solid var(--bdr);flex-shrink:0;}
+#rot-bar.hidden{display:none;}
+.rot-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--tx3);flex-shrink:0;}
+.dwell-wrap{display:flex;gap:4px;}
+.dw{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border-radius:6px;cursor:pointer;background:var(--bg3);border:1px solid var(--bdr);color:var(--tx3);}
+.dw.on{background:var(--teal2);border-color:var(--teal2);color:#fff;font-weight:600;}
+.rot-prog{flex:1;height:2px;background:var(--bdr);border-radius:2px;overflow:hidden;}
+.rot-fill{height:100%;background:var(--teal);width:0%;border-radius:2px;}
+.rot-fill.go{transition:width linear;}
+.pdots{display:flex;gap:5px;align-items:center;}
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--bdr2);cursor:pointer;}
+.pdot.on{background:var(--teal);transform:scale(1.3);}
+#rot-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:5px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;background:var(--gbg);border:1px solid var(--gbd);color:var(--gr);}
+#rot-btn.paused{background:var(--bg3);border-color:var(--bdr);color:var(--tx3);}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border-bottom:1px solid var(--bdr);flex-shrink:0;gap:10px;box-shadow:0 2px 12px rgba(0,0,0,.15);}
+.brand{display:flex;align-items:baseline;gap:7px;}
+.brand-n{font-family:'Libre Baskerville',serif;font-size:20px;font-weight:700;}
+.brand-b{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);letter-spacing:1.5px;}
+.connw{display:flex;align-items:center;gap:5px;}
+.cdot{width:8px;height:8px;border-radius:50%;}
+.cdot.live{background:var(--gr);animation:pg 2s ease infinite;}
+.cdot.sim{background:var(--am);animation:pa 2s ease infinite;}
+.clbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx3);}
+.hdr-r{display:flex;align-items:center;gap:8px;}
+.mtog{display:flex;background:var(--bg3);border:1px solid var(--bdr);border-radius:8px;overflow:hidden;}
+.mbtn{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1px;padding:7px 14px;background:transparent;border:none;color:var(--tx3);cursor:pointer;}
+.mbtn.on{background:var(--teal2);color:#fff;font-weight:600;}
+.ibtn{width:34px;height:34px;border-radius:8px;background:var(--bg3);border:1px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;line-height:1;}
+.clk{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--tx3);}
+
+/* ── PAGE / VIEWS ── */
+#page{flex:1;overflow:hidden;display:flex;flex-direction:column;min-height:0;}
+.view{display:none;flex:1;overflow-y:auto;padding:10px;flex-direction:column;min-height:0;}
+.view.on{display:flex;}
+
+/* ── CLINICAL GRID — cards stacked top to bottom ── */
+#clin-grid{display:flex;flex-direction:column;gap:8px;flex:1;min-height:0;}
+
+/* ── ZONE CARD — horizontal strip ── */
+.zcard{
+  flex:1;min-height:0;
+  display:flex;flex-direction:column;
+  background:var(--card);border-radius:14px;overflow:hidden;
+  border:1px solid var(--bdr);border-left:5px solid var(--bdr);
+  box-shadow:0 2px 8px var(--shad);
+}
+.zcard.green{border-left-color:var(--gr);}
+.zcard.amber{border-left-color:var(--am);}
+.zcard.red{border-left-color:var(--rd);}
+.zcard.offl{border-left-color:var(--off);opacity:.7;}
+
+/* MAIN ROW — the clickable horizontal strip inside each card */
+.zmain{
+  flex:1;min-height:0;
+  display:grid;
+  grid-template-columns:200px 1fr 170px;
+  cursor:pointer;
+  transition:background .15s ease;
+}
+.zmain:hover{background:rgba(29,191,160,.05);}
+.zmain:active{background:rgba(29,191,160,.12);}
+
+/* LEFT */
+.zleft{padding:14px 16px;display:flex;flex-direction:column;justify-content:center;gap:8px;border-right:1px solid var(--bdr);}
+.ztier{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--tx3);}
+.zname{font-family:'Libre Baskerville',serif;font-size:24px;font-weight:700;color:var(--tx);line-height:1.15;}
+.zpres{font-family:'IBM Plex Mono',monospace;font-size:11px;padding:3px 10px;border-radius:20px;display:inline-block;align-self:flex-start;}
+.zpres.occ{background:var(--gbg);border:1px solid var(--gbd);color:var(--gr);}
+.zpres.vac{background:var(--bg3);border:1px solid var(--bdr);color:var(--tx3);}
+
+/* MIDDLE — sensors */
+.zmid{display:flex;align-items:stretch;}
+.zsen{flex:1;padding:14px 10px;border-right:1px solid var(--bdr);display:flex;flex-direction:column;justify-content:center;}
+.zsen:last-child{border-right:none;}
+.zsen-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--tx3);margin-bottom:8px;}
+.zsen-val{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;line-height:1;}
+.zsen-val.green{color:var(--gr);}.zsen-val.amber{color:var(--am);}.zsen-val.red{color:var(--rd);}.zsen-val.neutral{color:var(--tx2);}
+
+/* RIGHT — status + sparkline */
+.zright{padding:14px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;border-left:1px solid var(--bdr);}
+.zstatus{font-family:'IBM Plex Mono',monospace;font-size:34px;font-weight:600;letter-spacing:1px;line-height:1;transition:color .4s ease,text-shadow .4s ease;}
+.zstatus.green{color:var(--gr);text-shadow:0 0 20px rgba(34,197,94,.5),0 0 40px rgba(34,197,94,.2);}
+.zstatus.amber{color:var(--am);text-shadow:0 0 20px rgba(245,158,11,.5),0 0 40px rgba(245,158,11,.2);}
+.zstatus.red{color:var(--rd);text-shadow:0 0 20px rgba(239,68,68,.6),0 0 40px rgba(239,68,68,.25);}
+.zstatus.offl{color:var(--off);text-shadow:none;}
+.zpulse{width:11px;height:11px;border-radius:50%;}
+.zpulse.green{background:var(--gr);animation:pg 2.5s ease infinite;}
+.zpulse.amber{background:var(--am);animation:pa 2.5s ease infinite;}
+.zpulse.red{background:var(--rd);animation:pr 1.8s ease infinite;}
+.zpulse.offl{background:var(--off);}
+.zspark-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx3);}
+.zts-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx3);text-align:center;}
+.zts-val{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--tx2);text-align:center;}
+
+/* EXPAND BUTTON — full width, sits below main row */
+.zexpand{
+  display:block;width:100%;flex-shrink:0;
+  font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:1px;
+  color:var(--tx3);text-align:right;
+  background:var(--bg3);border:none;border-top:1px solid var(--bdr);
+  padding:6px 14px;cursor:pointer;
+  transition:color .15s,background .15s;
+}
+.zexpand:hover{color:var(--teal);background:var(--bg4);}
+.zexpand.open{color:var(--teal);background:var(--bg4);}
+
+/* DETAIL PANEL — below expand button */
+/* Slide-down animation for detail panels */
+@keyframes slideDown{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.zdetail{display:none;flex-shrink:0;padding:14px;background:var(--bg3);border-top:1px solid var(--bdr);}
+.zdetail.open{display:block;animation:slideDown .2s ease forwards;}
+.det-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;}
+.det-box{background:var(--bg2);border-radius:8px;padding:10px;text-align:center;}
+.det-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx3);margin-bottom:4px;}
+.det-val{font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:var(--tx2);}
+.det-val.green{color:var(--gr);}.det-val.amber{color:var(--am);}.det-val.red{color:var(--rd);}
+.ns-block{border-radius:8px;overflow:hidden;border:1px solid var(--bdr);margin-top:8px;}
+.ns-head{padding:8px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;}
+.ns-head.amber{background:var(--abg);color:var(--am);border-bottom:1px solid var(--abd);}
+.ns-head.red{background:var(--rbg);color:var(--rd);border-bottom:1px solid var(--rbd);}
+.ns-body{background:var(--bg2);padding:8px 12px;}
+.ns-row{display:flex;gap:8px;padding:5px 0;border-bottom:1px solid var(--bdr);font-size:13px;color:var(--tx2);line-height:1.5;}
+.ns-row:last-child{border-bottom:none;padding-bottom:0;}
+.ns-n{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);font-weight:600;flex-shrink:0;margin-top:2px;}
+
+/* Clinical footer */
+#clin-footer{flex-shrink:0;display:flex;justify-content:space-around;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:8px 12px;margin-top:6px;gap:6px;}
+.cf-i{display:flex;flex-direction:column;gap:1px;text-align:center;}
+.cf-l{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx3);}
+.cf-v{font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:600;color:var(--tx2);}
+.cf-v.green{color:var(--gr);}.cf-v.amber{color:var(--am);}.cf-v.red{color:var(--rd);}
+
+/* ── IT VIEW ── */
+.it-sec{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--teal);margin-bottom:8px;}
+.mesh-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;background:var(--card);border:1px solid var(--bdr);border-radius:10px;padding:12px;margin-bottom:12px;}
+.ms-v{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:600;color:var(--teal);margin-bottom:2px;text-align:center;}
+.ms-l{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx3);text-align:center;}
+.ncard{
+  display:flex;flex-direction:column;
+  background:var(--card);border:1px solid var(--bdr);border-radius:10px;
+  margin-bottom:8px;overflow:hidden;cursor:pointer;
+}
+.ncard:hover{background:rgba(29,191,160,.03);}
+.ncard-row{
+  display:grid;grid-template-columns:auto 1fr auto auto;
+  gap:10px;align-items:center;padding:12px 14px;
+}
+.ncard-expand{
+  display:block;width:100%;padding:5px 14px;text-align:right;
+  font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;
+  color:var(--tx4);background:var(--bg3);border:none;border-top:1px solid var(--bdr);cursor:pointer;
+  transition:color .15s,background .15s;
+}
+.ncard-expand:hover{color:var(--teal);background:var(--bg4);}
+.ncard-expand.open{color:var(--teal);background:var(--bg4);}
+.ncard-detail{
+  display:none;padding:12px 14px;
+  background:var(--bg3);border-top:1px solid var(--bdr);
+}
+.ncard-detail.open{display:block;animation:slideDown .2s ease forwards;}
+.ndet-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.ndet-box{background:var(--bg2);border-radius:8px;padding:10px;text-align:center;}
+.ndet-lbl{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx3);margin-bottom:4px;}
+.ndet-val{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;color:var(--tx2);}
+.ndet-val.green{color:var(--gr);}.ndet-val.amber{color:var(--am);}.ndet-val.red{color:var(--rd);}
+.nid{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);background:rgba(29,191,160,.1);border:1px solid rgba(29,191,160,.2);border-radius:6px;padding:5px 8px;white-space:nowrap;}
+.nname{font-size:14px;font-weight:600;color:var(--tx);}
+.nmeta{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx3);margin-top:2px;}
+.nsigs{display:flex;flex-direction:column;gap:3px;align-items:flex-end;}
+.spill{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:500;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.spill.g{background:var(--gbg);color:var(--gr);border:1px solid var(--gbd);}
+.spill.w{background:var(--abg);color:var(--am);border:1px solid var(--abd);}
+.spill.b{background:var(--rbg);color:var(--rd);border:1px solid var(--rbd);}
+.batwrap{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.baticon{position:relative;width:22px;height:11px;border:2px solid var(--bdr2);border-radius:2px;overflow:hidden;}
+.batfill{height:100%;border-radius:1px;}
+.batpct{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);}
+.elog{background:var(--card);border:1px solid var(--bdr);border-radius:10px;overflow:hidden;}
+.elog-hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--bdr);}
+.elog-title{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--teal);}
+.elog-acts{display:flex;gap:6px;}
+.elog-btn{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:4px 10px;border-radius:5px;cursor:pointer;border:none;}
+.elog-btn.ex{background:var(--gbg);border:1px solid var(--gbd);color:var(--gr);}
+.elog-btn.cl{background:var(--rbg);border:1px solid var(--rbd);color:var(--rd);}
+.elog-cols{display:grid;grid-template-columns:68px 58px 85px 1fr;gap:6px;padding:6px 14px;background:var(--bg3);border-bottom:1px solid var(--bdr);}
+.elog-col{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--tx4);}
+.elog-body{max-height:180px;overflow-y:auto;}
+.elog-row{display:grid;grid-template-columns:68px 58px 85px 1fr;gap:6px;padding:6px 14px;border-bottom:1px solid var(--bdr);align-items:center;}
+.elog-row:last-child{border-bottom:none;}
+.elog-t{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx3);}
+.elog-ty{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;}
+.elog-ty.START,.elog-ty.INFO{color:var(--teal);}
+.elog-ty.ALERT{color:var(--rd);}
+.elog-ty.WARN{color:var(--am);}
+.elog-ty.STATUS,.elog-ty.EXPORT{color:var(--gr);}
+.elog-z{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--tx2);}
+.elog-m{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* ── SETUP VIEW ── */
+.scard{background:var(--card);border:1px solid var(--bdr);border-radius:12px;overflow:hidden;margin-bottom:12px;}
+.scard-head{background:var(--teal2);padding:14px 18px;}
+.scard-title{font-family:'Libre Baskerville',serif;font-size:18px;font-weight:700;color:#fff;}
+.scard-sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:rgba(255,255,255,.75);margin-top:3px;}
+.scard-body{padding:14px 18px;}
+.ssec{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:2px;color:var(--teal);margin-bottom:10px;}
+.sstep{display:flex;gap:12px;align-items:flex-start;margin-bottom:12px;}
+.snum{width:28px;height:28px;border-radius:50%;background:var(--teal2);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#fff;}
+.stitle{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px;}
+.sbody{font-size:12px;color:var(--tx3);line-height:1.6;}
+.scode{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--gr);background:var(--bg3);padding:5px 10px;border-radius:5px;display:inline-block;margin-top:5px;line-height:1.7;}
+.nrow{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;}
+.nbadge{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--teal);background:rgba(29,191,160,.1);border:1px solid rgba(29,191,160,.2);border-radius:5px;padding:4px 8px;}
+.nrole{font-family:'IBM Plex Mono',monospace;font-size:10px;padding:3px 7px;border-radius:5px;}
+.nrole.hub{background:rgba(29,191,160,.15);color:var(--teal);border:1px solid rgba(29,191,160,.3);}
+.nrole.mesh{background:var(--gbg);color:var(--gr);border:1px solid var(--gbd);}
+.trow{background:var(--bg3);border-radius:8px;padding:10px 12px;margin-bottom:6px;}
+.tq{font-size:13px;font-weight:600;color:var(--am);margin-bottom:4px;}
+.ta{font-size:12px;color:var(--tx3);line-height:1.5;}
+
+/* ── ANIMATIONS ── */
+@keyframes pg{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.4)}50%{box-shadow:0 0 0 7px rgba(34,197,94,0)}}
+@keyframes pa{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,.4)}50%{box-shadow:0 0 0 7px rgba(245,158,11,0)}}
+@keyframes pr{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.5)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px;}
+
+/* ── VITALS card accent ─────────────────────────────────────────────────── */
+:root {
+  --rose:   #FB7185;
+  --rosebg: rgba(251,113,133,.12);
+  --rosebd: rgba(251,113,133,.35);
+  --cyan:   #22D3EE;
+  --cyanbg: rgba(34,211,238,.12);
+  --cyanbd: rgba(34,211,238,.3);
+}
+.zcard.vitals-green { border-left-color: var(--gr); }
+.zcard.vitals-amber { border-left-color: var(--am); }
+.zcard.vitals-red   { border-left-color: var(--rd); }
+.zcard.vitals-offl  { border-left-color: var(--off); opacity:.7; }
+
+/* BPM value — large, with subtle heartbeat glow when normal */
+.bpm-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 42px; font-weight: 600; line-height: 1;
+  color: var(--gr);
+  text-shadow: 0 0 18px rgba(34,197,94,.45), 0 0 36px rgba(34,197,94,.18);
+  transition: color .4s, text-shadow .4s;
+}
+.bpm-val.amber {
+  color: var(--am);
+  text-shadow: 0 0 18px rgba(245,158,11,.5), 0 0 36px rgba(245,158,11,.2);
+}
+.bpm-val.red {
+  color: var(--rd);
+  text-shadow: 0 0 18px rgba(239,68,68,.6), 0 0 36px rgba(239,68,68,.25);
+}
+.bpm-val.neutral { color: var(--tx3); text-shadow: none; }
+.bpm-unit {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px; color: var(--tx3); letter-spacing: 1px; margin-top: 4px;
+}
+
+/* SpO2 value */
+.spo2-val {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 30px; font-weight: 600; line-height: 1;
+  transition: color .4s;
+}
+.spo2-val.green  { color: var(--cyan); }
+.spo2-val.amber  { color: var(--am); }
+.spo2-val.red    { color: var(--rd); }
+.spo2-val.neutral{ color: var(--tx3); }
+
+/* Finger badge */
+.finger-badge {
+  font-family: 'IBM Plex Mono', monospace; font-size: 11px;
+  padding: 3px 10px; border-radius: 20px; display: inline-block; align-self: flex-start;
+}
+.finger-badge.on  { background: var(--cyanbg); border: 1px solid var(--cyanbd); color: var(--cyan); }
+.finger-badge.off { background: var(--bg3); border: 1px solid var(--bdr); color: var(--tx3); }
+
+/* Vitals tier label */
+.ztier-vitals { color: var(--rose); }
+
+/* Heartbeat animation on the pulse dot for vitals */
+@keyframes heartbeat {
+  0%,100% { transform: scale(1); }
+  14%     { transform: scale(1.3); }
+  28%     { transform: scale(1); }
+  42%     { transform: scale(1.2); }
+}
+.zpulse.vitals-green {
+  background: var(--gr);
+  animation: heartbeat 0.8s ease infinite;
+}
+.zpulse.vitals-amber {
+  background: var(--am);
+  animation: heartbeat 1.2s ease infinite;
+}
+.zpulse.vitals-red {
+  background: var(--rd);
+  animation: heartbeat 0.5s ease infinite;
+}
+
+
+/* ── Demo alarm button ─────────────────────────────────────────────────── */
+#demo-btn {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--rd);
+  border: 2px solid rgba(239,68,68,.5);
+  box-shadow: 0 0 0 0 rgba(239,68,68,.4);
+  cursor: pointer;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  transition: transform .15s, box-shadow .15s;
+  opacity: 0.55;
+}
+#demo-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 0 0 6px rgba(239,68,68,.2);
+}
+#demo-btn:active {
+  transform: scale(.95);
+}
+#demo-btn.alarming {
+  opacity: 1;
+  animation: demo-alarm-pulse 0.6s ease infinite;
+}
+#demo-toast {
+  position: fixed;
+  bottom: 68px;
+  right: 18px;
+  background: var(--bg2);
+  border: 1px solid var(--rbd);
+  border-radius: 10px;
+  padding: 8px 14px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--rd);
+  letter-spacing: .5px;
+  z-index: 999;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity .25s, transform .25s;
+  white-space: nowrap;
+}
+#demo-toast.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+@keyframes demo-alarm-pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,.6); }
+  50%      { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+}
+
+</style>
+</head>
+<body>
+
+<div id="sim-banner">SIMULATION — Connect AETH Hub (!04083034) via USB and run aethelis_bridge.py to go live</div>
+
+<div id="summary-bar">
+  <div id="sb-pills"></div>
+  <div id="sb-sys" class="green">NORMAL</div>
+</div>
+
+<div id="rot-bar" class="hidden">
+  <span class="rot-lbl">AUTO-ROTATE</span>
+  <div class="dwell-wrap">
+    <button class="dw on" data-dwell="15">15s</button>
+    <button class="dw"    data-dwell="30">30s</button>
+    <button class="dw"    data-dwell="45">45s</button>
+    <button class="dw"    data-dwell="60">60s</button>
+  </div>
+  <div class="rot-prog"><div class="rot-fill" id="rot-fill"></div></div>
+  <div class="pdots" id="pdots"></div>
+  <button id="rot-btn">⏸ PAUSE</button>
+</div>
+
+<header>
+  <div class="brand"><span class="brand-n">Milieu</span><span class="brand-b">BY AETHELIS</span></div>
+  <div class="connw"><div class="cdot sim" id="cdot"></div><span class="clbl" id="clbl">SIMULATION</span></div>
+  <div class="hdr-r">
+    <div class="mtog">
+      <button class="mbtn on" data-mode="clinical">CLINICAL</button>
+      <button class="mbtn"    data-mode="it">IT</button>
+      <button class="mbtn"    data-mode="setup">SETUP</button>
+    </div>
+    <div class="ibtn" id="rot-bar-btn" title="Auto-rotate">⟳</div>
+    <div class="ibtn" id="tbtn">🌙</div>
+    <div class="clk" id="clk">--:--</div>
+  </div>
+</header>
+
+<div id="page">
+  <div id="v-clinical" class="view on">
+    <div id="clin-grid"></div>
+    <div id="clin-footer"></div>
+  </div>
+  <div id="v-it" class="view">
+    <div class="it-sec">AETHELIS PLEXUS — MESH HEALTH</div>
+    <div class="mesh-sum">
+      <div><div class="ms-v" id="ms-on">3</div><div class="ms-l">GANGLIA ONLINE</div></div>
+      <div><div class="ms-v" id="ms-rs">—</div><div class="ms-l">AVG RSSI</div></div>
+      <div><div class="ms-v" id="ms-pl">—</div><div class="ms-l">PKT LOSS %</div></div>
+      <div><div class="ms-v" id="ms-up">—</div><div class="ms-l">AVG UPTIME</div></div>
+    </div>
+    <div class="it-sec">AETHELIS GANGLION — NODE STATUS</div>
+    <div id="ncards"></div>
+    <div class="elog">
+      <div class="elog-hdr">
+        <div class="elog-title">EVENT LOG — LIVE</div>
+        <div class="elog-acts">
+          <button class="elog-btn ex" id="export-btn">⬇ CSV</button>
+          <button class="elog-btn cl" id="clear-btn">✕ CLEAR</button>
+        </div>
+      </div>
+      <div class="elog-cols">
+        <span class="elog-col">TIME</span><span class="elog-col">TYPE</span>
+        <span class="elog-col">ZONE</span><span class="elog-col">EVENT</span>
+      </div>
+      <div class="elog-body" id="elog-body"></div>
+    </div>
+  </div>
+  <div id="v-setup" class="view">
+    <div class="scard">
+      <div class="scard-head"><div class="scard-title">Setup &amp; Connection Guide</div>
+      <div class="scard-sub">Milieu by Aethelis v0.4 — How to connect your Plexus mesh</div></div>
+      <div class="scard-body">
+        <div class="ssec">DAILY STARTUP — 4 STEPS</div>
+        <div class="sstep"><div class="snum">1</div><div>
+          <div class="stitle">Plug in AETH Hub</div>
+          <div class="sbody">Connect <span style="font-family:'IBM Plex Mono',monospace;color:var(--teal)">!04083034</span> to this tablet via USB-C. Tap <strong>ALLOW</strong> when prompted.</div>
+        </div></div>
+        <div class="sstep"><div class="snum">2</div><div>
+          <div class="stitle">Run the bridge script</div>
+          <div class="sbody">Open Pydroid 3, open <strong>aethelis_bridge.py</strong>, tap RUN ▶.</div>
+          <div class="scode">Connected! Listening for packets...<br>WebSocket ready on port 8765</div>
+        </div></div>
+        <div class="sstep"><div class="snum">3</div><div>
+          <div class="stitle">Return to Milieu</div>
+          <div class="sbody">SIMULATION banner disappears and shows LIVE within 60 seconds.</div>
+        </div></div>
+        <div class="sstep"><div class="snum">4</div><div>
+          <div class="stitle">Interact with the display</div>
+          <div class="sbody">Click any zone card to expand details. Tap ⟳ for auto-rotation between pages.</div>
+        </div></div>
+      </div>
+    </div>
+    <div class="scard"><div class="scard-body">
+      <div class="ssec">YOUR AETHELIS GANGLION NODES</div>
+      <div class="nrow"><div class="nbadge">!04083034</div><div>
+        <div class="stitle" style="font-size:13px;">AETH Hub — Zone 1 — OR Suite</div>
+        <div class="sbody">GATEWAY NODE — plug into tablet</div></div><div class="nrole hub">HUB</div></div>
+      <div class="nrow"><div class="nbadge">!0400d1b0</div><div>
+        <div class="stitle" style="font-size:13px;">Aeth-Frank — Zone 2 — ICU Bay</div>
+        <div class="sbody">Wireless mesh node · SNR 5.75 dB · RSSI -35 dB</div></div><div class="nrole mesh">MESH</div></div>
+      <div class="nrow"><div class="nbadge">!04009d18</div><div>
+        <div class="stitle" style="font-size:13px;">Aeth-Beans — Zone 3 — Pharmacy</div>
+        <div class="sbody">Wireless mesh node · SNR 6.50 dB · RSSI -55 dB</div></div><div class="nrole mesh">MESH</div></div>
+      <div class="nrow"><div class="nbadge" style="color:var(--rose);background:rgba(251,113,133,.1);border-color:rgba(251,113,133,.25);">PENDING</div><div>
+        <div class="stitle" style="font-size:13px;">♥ Cardputer — Vitals Monitor</div>
+        <div class="sbody">MAX30102 heart rate + SpO₂ · LoRa 915MHz · Node ID assigned at first boot</div></div>
+        <div class="nrole" style="background:rgba(251,113,133,.12);color:var(--rose);border:1px solid rgba(251,113,133,.3);">VITALS</div></div>
+    </div></div>
+    <div class="scard"><div class="scard-body">
+      <div class="ssec">TROUBLESHOOTING</div>
+      <div class="trow"><div class="tq">Still shows SIMULATION after 2 minutes</div>
+        <div class="ta">Check aethelis_bridge.py is running in Pydroid 3. Confirm Ganglion nodes are powered on.</div></div>
+      <div class="trow"><div class="tq">USB connection failed in Pydroid 3</div>
+        <div class="ta">Try a data cable (some USB-C are charge-only). Unplug, replug, tap ALLOW.</div></div>
+      <div class="trow"><div class="tq">Temperature reads ~94°F</div>
+        <div class="ta">AHT20+BMP280 sensors not yet installed. Node reporting chip temp — normal until sensors connected.</div></div>
+    </div></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+const WS_URL = 'ws://localhost:8765';
+let mode = 'clinical', theme = 'dark';
+let wsConn = null, simTimer = null, LOG = [];
+
+// Persistent open state — survives re-renders
+const openSet   = new Set(); // clinical cards
+const openSetIT = new Set(); // IT node cards
+
+// Rotation
+const PER_PAGE = 3;
+let pg = 0, dwell = 15, rotOn = false, rotTimer = null, rotShown = false;
+
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+let nodes = [
+  {id:1,name:'Zone 1 — OR Suite',nodeId:'!04083034',nodeName:'AETH Hub',
+   tier:'TIER 1 — OPERATING ROOM',temp:21.2,hum:52,pres:1013.0,voc:.30,
+   rssi:-42,snr:6.2,pl:.4,bat:78,occ:true,conn:true,up:61200,
+   status:'green',hist:[20.9,21.0,21.1,21.0,21.2,21.1,21.2],seen:new Date()},
+  {id:2,name:'Zone 2 — ICU Bay',nodeId:'!0400d1b0',nodeName:'Aeth-Frank',
+   tier:'TIER 1 — INTENSIVE CARE',temp:22.8,hum:48,pres:1012.0,voc:.50,
+   rssi:-35,snr:5.75,pl:.8,bat:65,occ:true,conn:true,up:58800,
+   status:'green',hist:[22.5,22.6,22.8,22.7,22.9,22.8,22.8],seen:new Date()},
+  {id:3,name:'Zone 3 — Pharmacy',nodeId:'!04009d18',nodeName:'Aeth-Beans',
+   tier:'TIER 2 — PHARMACY',temp:19.4,hum:61,pres:1011.0,voc:.40,
+   rssi:-55,snr:6.5,pl:1.2,bat:91,occ:false,conn:true,up:55200,
+   status:'green',hist:[19.2,19.3,19.4,19.3,19.5,19.4,19.4],seen:new Date()},
+  // Node 4 — Cardputer vitals Ganglion (MAX30102 heart rate + SpO2)
+  {id:4,name:'Vitals Monitor',nodeId:'PENDING',nodeName:'Cardputer',
+   tier:'CARDPUTER — VITALS GANGLION',
+   type:'vitals',
+   bpm:72,spo2:98,finger:true,
+   rssi:-48,snr:5.8,pl:.6,bat:85,conn:true,up:0,
+   status:'green',hist:[70,71,72,71,73,72,72],seen:new Date()},
+];
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+const c2f = c => (c*9/5+32).toFixed(1);
+const up2s = s => Math.floor(s/3600)+'h '+Math.floor((s%3600)/60)+'m';
+const t2s = d => (d||new Date()).toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+const ago = d => {
+  if(!d) return '—';
+  const s=Math.floor((Date.now()-d)/1000);
+  if(s<10) return 'just now'; if(s<60) return s+'s ago'; return Math.floor(s/60)+'m ago';
+};
+const tcl = f => f>82?'red':f>78?'amber':'green';
+const hcl = h => h>68?'red':h>62?'amber':'green';
+const rcl = r => r>-60?'g':r>-80?'w':'b';
+const pcl = p => p<2?'g':p<4?'w':'b';
+const bcl = p => p>50?'var(--gr)':p>20?'var(--am)':'var(--rd)';
+// Vitals color helpers
+const bpmCl  = b => b>120||b<50?'red':b>100||b<60?'amber':'green';
+const spo2Cl = o => o<90?'red':o<94?'amber':'green';
+
+function calcStatus(n) {
+  if(!n.conn) return 'offl';
+  if(n.type==='vitals') {
+    if(!n.finger) return 'amber';            // no contact
+    if(n.bpm>120||n.bpm<50||n.spo2<90) return 'red';
+    if(n.bpm>100||n.bpm<60||n.spo2<94) return 'amber';
+    return 'green';
+  }
+  const f=parseFloat(c2f(n.temp));
+  if(f>82||n.hum>68||n.pl>4) return 'red';
+  if(f>78||n.hum>62||n.pl>2) return 'amber';
+  return 'green';
+}
+function addLog(zone,type,msg) {
+  LOG.unshift({t:new Date(),zone,type,msg});
+  if(LOG.length>150) LOG.pop();
+  if(mode==='it') renderLog();
+}
+
+// ═══════════════════════════════════════════════════════
+// SPARKLINE
+// ═══════════════════════════════════════════════════════
+function spark(data, col) {
+  if(!data||data.length<2) return '';
+  const w=100,h=24,p=2;
+  const mn=Math.min(...data),mx=Math.max(...data),rng=mx-mn||.01;
+  const pts=data.map((v,i)=>{
+    const x=p+(i/(data.length-1))*(w-p*2);
+    const y=h-p-((v-mn)/rng)*(h-p*2);
+    return x.toFixed(1)+','+y.toFixed(1);
+  }).join(' ');
+  const last=pts.split(' ').slice(-1)[0];
+  const lx=last.split(',')[0],ly=last.split(',')[1];
+  const area=`${p},${h-p} ${pts} ${lx},${h-p}`;
+  const gid='g'+(Math.random()*9999|0);
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs>
+    <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="${col}" stop-opacity=".25"/>
+      <stop offset="100%" stop-color="${col}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <polygon points="${area}" fill="url(#${gid})"/>
+    <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${lx}" cy="${ly}" r="2.5" fill="${col}"/>
+  </svg>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// NEXT STEPS
+// ═══════════════════════════════════════════════════════
+const NS = {
+  ta:{lv:'amber',title:'⚠ TEMPERATURE WARNING',
+    cl:['Temperature approaching ASHRAE 170 limit of 78°F.',
+        'Notify facilities to inspect HVAC for this zone.',
+        'Check for propped doors or nearby heat sources.',
+        'Document deviation in environmental compliance log.'],
+    it:['Amber threshold (78°F) exceeded — verify sensor placement.',
+        'Confirm node is not mounted near heat-generating equipment.',
+        'Review RSSI/SNR in IT view — signal issues can corrupt sensor readings.']},
+  tr:{lv:'red',title:'🚨 TEMPERATURE ALERT — ACTION REQUIRED',
+    cl:['Temperature exceeds ASHRAE 170 standard of 78°F for clinical spaces.',
+        'Contact facilities management IMMEDIATELY with zone name and reading.',
+        'Notify charge nurse — consider delaying procedures in affected zone.',
+        'Document time, reading, and all actions taken in compliance record.'],
+    it:['Red threshold (82°F) exceeded — confirm sensor accuracy first.',
+        'If accurate: alert facilities and check HVAC for this zone.',
+        'Export event log CSV (IT tab) for DHF verification records.']},
+  ha:{lv:'amber',title:'⚠ HUMIDITY WARNING',
+    cl:['Humidity approaching ASHRAE 170 upper limit of 60% RH.',
+        'Notify facilities — elevated humidity risks sterile field integrity.',
+        'Monitor trend — escalate sooner if reading is still rising.'],
+    it:['Amber threshold (62%) exceeded — verify AHT20 sensor placement.',
+        'Cross-reference pressure — simultaneous drops may indicate HVAC fault.']},
+  hr:{lv:'red',title:'🚨 HUMIDITY ALERT — ACTION REQUIRED',
+    cl:['Humidity exceeds safe range. ASHRAE 170 specifies 20–60% RH for ORs.',
+        'Contact facilities IMMEDIATELY with zone name and reading.',
+        'Notify charge nurse — consider postponing procedures.',
+        'Document time, reading, and actions taken.'],
+    it:['Red threshold (68%) exceeded — check sensor for condensation.',
+        'If accurate: immediate facilities alert required.',
+        'Export event log CSV for DHF records.']},
+  of:{lv:'red',title:'🔴 NODE OFFLINE',
+    cl:['Ganglion node not transmitting. Environmental monitoring unavailable.',
+        'Notify IT to investigate immediately.',
+        'Do not rely on last known reading for compliance decisions.'],
+    it:['Node stopped transmitting. Check power and indicator LED.',
+        'For AETH Hub: confirm USB connection and bridge script is running.',
+        'For mesh nodes: check LoRa range — may have been moved or powered off.']},
+  // Vitals next steps
+  vhr:{lv:'red',title:'🚨 HIGH HEART RATE — >120 BPM',
+    cl:['Heart rate exceeds normal range (60–100 BPM).',
+        'Assess subject immediately — verify electrode contact and rule out artifact.',
+        'If confirmed tachycardia, follow facility cardiac emergency protocol.',
+        'Document time, BPM reading, and actions taken.'],
+    it:['BPM >120 threshold exceeded. Verify finger placement on MAX30102 sensor.',
+        'Check for motion artifact — subject must be reasonably still for accurate reading.',
+        'Confirm Cardputer is transmitting clean LoRa packets in IT event log.']},
+  vlr:{lv:'red',title:'🚨 LOW HEART RATE — <50 BPM',
+    cl:['Heart rate below normal range (60–100 BPM).',
+        'Assess subject immediately — verify sensor contact before escalating.',
+        'If confirmed bradycardia, follow facility cardiac emergency protocol.',
+        'Document time, BPM reading, and actions taken.'],
+    it:['BPM <50 threshold exceeded. Verify finger placement on MAX30102 sensor.',
+        'A loose or partial contact can report falsely low BPM.',
+        'Check Cardputer firmware — ensure sampling rate is set to 250Hz.']},
+  vha:{lv:'amber',title:'⚠ ELEVATED HEART RATE — >100 BPM',
+    cl:['Heart rate above resting normal. Monitor closely.',
+        'Verify subject is at rest — activity, anxiety, or caffeine can elevate BPM.',
+        'If sustained above 100 BPM at rest, notify clinical staff.'],
+    it:['BPM >100 amber threshold. Check for motion interference on the sensor.',
+        'Confirm SpO2 reading is stable — unstable SpO2 + elevated BPM may indicate artifact.']},
+  vla:{lv:'amber',title:'⚠ LOW HEART RATE — <60 BPM',
+    cl:['Heart rate below typical resting range.',
+        'May be normal for athletic subjects. Confirm subject status.',
+        'If subject reports symptoms, escalate to clinical staff.'],
+    it:['BPM <60 amber threshold. Verify sensor contact is firm.',
+        'Some subjects have naturally low resting heart rate — confirm with subject.']},
+  vso:{lv:'red',title:'🚨 LOW SpO2 — BELOW 90%',
+    cl:['Blood oxygen saturation critically low.',
+        'Verify sensor placement — nail polish, cold fingers, or poor contact causes false lows.',
+        'If confirmed after repositioning, escalate to clinical staff IMMEDIATELY.',
+        'Document reading, time, and actions taken.'],
+    it:['SpO2 <90% red threshold. Reposition sensor on a warm, clean fingertip.',
+        'Ensure subject finger is still — motion severely affects MAX30102 readings.',
+        'If reading persists after repositioning, notify clinical staff.']},
+  vsoa:{lv:'amber',title:'⚠ SpO2 BELOW 94%',
+    cl:['Blood oxygen saturation below normal range (95–100%).',
+        'Verify sensor placement and reposition on a clean fingertip.',
+        'Monitor closely — if declining, escalate to clinical staff.'],
+    it:['SpO2 <94% amber threshold. Check for motion artifact or poor contact.',
+        'Confirm finger is warm — cold extremities reduce MAX30102 accuracy.']},
+  vnf:{lv:'amber',title:'⚠ NO FINGER DETECTED',
+    cl:['Vitals Ganglion not detecting finger contact.',
+        'Ask subject to place finger firmly on the sensor.',
+        'No valid BPM or SpO2 readings available while contact is lost.'],
+    it:['MAX30102 finger detection lost. Subject may have removed finger.',
+        'Sensor reports bpm:0, spo2:0 when no contact — ignore those readings.',
+        'Check Cardputer display for local confirmation of sensor state.']},
+};
+function nsHtml(n) {
+  const steps=[];
+  if(!n.conn){ steps.push(NS.of); }
+  else if(n.type==='vitals') {
+    if(!n.finger) steps.push(NS.vnf);
+    else {
+      if(n.bpm>120)        steps.push(NS.vhr);
+      else if(n.bpm<50)    steps.push(NS.vlr);
+      else if(n.bpm>100)   steps.push(NS.vha);
+      else if(n.bpm<60)    steps.push(NS.vla);
+      if(n.spo2<90)        steps.push(NS.vso);
+      else if(n.spo2<94)   steps.push(NS.vsoa);
+    }
+  } else {
+    const f=parseFloat(c2f(n.temp));
+    if(f>82) steps.push(NS.tr); else if(f>78) steps.push(NS.ta);
+    if(n.hum>68) steps.push(NS.hr); else if(n.hum>62) steps.push(NS.ha);
+  }
+  if(!steps.length) return '';
+  return steps.map(ns=>{
+    const msgs=mode==='clinical'?ns.cl:ns.it;
+    let h='<div class="ns-block">';
+    h+='<div class="ns-head '+ns.lv+'">'+ns.title+'</div>';
+    h+='<div class="ns-body">';
+    msgs.forEach((m,i)=>{h+='<div class="ns-row"><span class="ns-n">'+(i+1)+'.</span><span>'+m+'</span></div>';});
+    h+='</div></div>';
+    return h;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════
+// IT node card toggle
+function toggleDetailIT(id) {
+  if(openSetIT.has(id)) openSetIT.delete(id);
+  else openSetIT.add(id);
+  renderIT();
+}
+
+// ═══════════════════════════════════════════════════════
+function toggleDetail(id) {
+  if(openSet.has(id)) openSet.delete(id);
+  else openSet.add(id);
+  renderClinical();
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER CLINICAL
+// ═══════════════════════════════════════════════════════
+function renderClinical() {
+  const pgNodes = nodes.slice(pg*PER_PAGE, (pg+1)*PER_PAGE);
+  const grid = document.getElementById('clin-grid');
+
+  grid.innerHTML = pgNodes.map(n => {
+    const sc   = n.status;
+    const isVit= n.type==='vitals';
+    const col  = sc==='green'?'var(--gr)':sc==='amber'?'var(--am)':'var(--rd)';
+    const sl   = sc==='offl'?'OFFLINE':sc.charAt(0).toUpperCase()+sc.slice(1);
+    const isOp = openSet.has(n.id);
+    // Vitals uses vitals-<sc> class so CSS accent differs from env alerts
+    const cardClass = isVit ? 'vitals-'+sc : sc;
+
+    let html = '';
+    html += '<div class="zcard ' + cardClass + '">';
+    html += '<div class="zmain" data-action="detail" data-id="' + n.id + '">';
+
+    // ── LEFT COLUMN ───────────────────────────────────────
+    html += '<div class="zleft">';
+    if(isVit) {
+      html += '<div class="ztier ztier-vitals">♥ ' + n.tier + '</div>';
+      html += '<div class="zname">' + n.name + '</div>';
+      html += '<div class="finger-badge ' + (n.finger?'on':'off') + '">';
+      html += n.finger ? '● FINGER DETECTED' : '○ NO CONTACT';
+      html += '</div>';
+    } else {
+      const f = parseFloat(c2f(n.temp));
+      html += '<div class="ztier">' + n.tier + '</div>';
+      html += '<div class="zname">' + n.name + '</div>';
+      html += '<div class="zpres ' + (n.occ?'occ':'vac') + '">' + (n.occ?'● OCCUPIED':'○ VACANT') + '</div>';
+    }
+    html += '</div>';
+
+    // ── MIDDLE COLUMN ─────────────────────────────────────
+    html += '<div class="zmid">';
+    if(isVit) {
+      const bc = n.finger ? bpmCl(n.bpm) : 'neutral';
+      const oc = n.finger ? spo2Cl(n.spo2) : 'neutral';
+      // BPM — large display
+      html += '<div class="zsen" style="justify-content:center;align-items:center;text-align:center;border-right:1px solid var(--bdr);">';
+      html += '<div class="zsen-lbl">HEART RATE</div>';
+      html += '<div class="bpm-val ' + bc + '">' + (n.finger?n.bpm:'—') + '</div>';
+      html += '<div class="bpm-unit">BPM</div>';
+      html += '</div>';
+      // SpO2
+      html += '<div class="zsen">';
+      html += '<div class="zsen-lbl">SpO₂</div>';
+      html += '<div class="spo2-val ' + oc + '">' + (n.finger?n.spo2+'%':'—') + '</div>';
+      html += '<div class="zsen-lbl" style="margin-top:12px;margin-bottom:4px;">SIGNAL</div>';
+      html += '<div class="zsen-val ' + (n.rssi>-60?'green':n.rssi>-80?'amber':'red') + '" style="font-size:16px;">' + n.rssi + ' dB</div>';
+      html += '</div>';
+    } else {
+      const f = parseFloat(c2f(n.temp));
+      html += '<div class="zsen"><div class="zsen-lbl">TEMPERATURE</div><div class="zsen-val ' + tcl(f) + '">' + c2f(n.temp) + '°F</div></div>';
+      html += '<div class="zsen"><div class="zsen-lbl">HUMIDITY</div><div class="zsen-val ' + hcl(n.hum) + '">' + n.hum + '%</div></div>';
+      html += '<div class="zsen"><div class="zsen-lbl">PRESSURE</div><div class="zsen-val neutral">' + n.pres + ' hPa</div></div>';
+    }
+    html += '</div>';
+
+    // ── RIGHT COLUMN ──────────────────────────────────────
+    html += '<div class="zright">';
+    html += '<div class="zstatus ' + sc + '">' + sl + '</div>';
+    // Vitals pulse dot gets heartbeat animation
+    const pulseClass = isVit ? 'vitals-'+sc : sc;
+    html += '<div class="zpulse ' + pulseClass + '"></div>';
+    const sparkLbl = isVit ? 'BPM TREND' : 'TEMP TREND';
+    html += '<div class="zspark-lbl">' + sparkLbl + '</div>';
+    html += spark(n.hist, col);
+    html += '<div class="zts-lbl">LAST UPDATE</div>';
+    html += '<div class="zts-val">' + ago(n.seen) + '</div>';
+    html += '</div>';
+
+    html += '</div>'; // end zmain
+
+    // EXPAND BUTTON
+    html += '<button class="zexpand' + (isOp?' open':'') + '" data-action="detail" data-id="' + n.id + '">';
+    html += isOp ? '▲ CLOSE' : '▼ DETAILS';
+    html += '</button>';
+
+    // DETAIL PANEL
+    html += '<div class="zdetail' + (isOp?' open':'') + '">';
+    html += '<div class="det-grid">';
+    if(isVit) {
+      html += '<div class="det-box"><div class="det-lbl">BPM</div><div class="det-val ' + (n.finger?bpmCl(n.bpm):'neutral') + '">' + (n.finger?n.bpm:'—') + '</div></div>';
+      html += '<div class="det-box"><div class="det-lbl">SpO₂</div><div class="det-val ' + (n.finger?spo2Cl(n.spo2):'neutral') + '">' + (n.finger?n.spo2+'%':'—') + '</div></div>';
+      html += '<div class="det-box"><div class="det-lbl">CONTACT</div><div class="det-val ' + (n.finger?'green':'amber') + '">' + (n.finger?'YES':'NO') + '</div></div>';
+    } else {
+      html += '<div class="det-box"><div class="det-lbl">VOC</div><div class="det-val ' + (n.voc>.9?'red':n.voc>.6?'amber':'green') + '">' + n.voc + ' mg/m³</div></div>';
+    }
+    html += '<div class="det-box"><div class="det-lbl">RSSI</div><div class="det-val ' + (n.rssi>-60?'green':n.rssi>-80?'amber':'red') + '">' + n.rssi + ' dB</div></div>';
+    html += '<div class="det-box"><div class="det-lbl">SNR</div><div class="det-val ' + (n.snr>4?'green':n.snr>2?'amber':'red') + '">' + n.snr + ' dB</div></div>';
+    html += '<div class="det-box"><div class="det-lbl">PKT LOSS</div><div class="det-val ' + (n.pl>4?'red':n.pl>2?'amber':'green') + '">' + n.pl + '%</div></div>';
+    html += '<div class="det-box"><div class="det-lbl">NODE ID</div><div class="det-val" style="font-size:11px;color:var(--teal)">' + n.nodeId + '</div></div>';
+    html += '<div class="det-box"><div class="det-lbl">UPTIME</div><div class="det-val">' + up2s(n.up) + '</div></div>';
+    html += '</div>';
+    html += nsHtml(n);
+    html += '</div>'; // end zdetail
+
+    html += '</div>'; // end zcard
+    return html;
+  }).join('');
+
+  // Footer
+  const onl=nodes.filter(n=>n.conn).length;
+  const alts=nodes.filter(n=>n.status==='red').length;
+  const sys=alts>0?'red':nodes.some(n=>n.status==='amber')?'amber':'green';
+  const sl=sys==='red'?'ALERT':sys==='amber'?'WARNING':'NORMAL';
+  const avgF=(nodes.reduce((s,n)=>s+parseFloat(c2f(n.temp)),0)/nodes.length).toFixed(1);
+  const avgH=Math.round(nodes.reduce((s,n)=>s+n.hum,0)/nodes.length);
+  const tot=Math.ceil(nodes.length/PER_PAGE);
+  let fhtml='';
+  fhtml+='<div class="cf-i"><span class="cf-l">SYSTEM</span><span class="cf-v '+sys+'">'+sl+'</span></div>';
+  fhtml+='<div class="cf-i"><span class="cf-l">GANGLIA</span><span class="cf-v">'+onl+'/'+nodes.length+'</span></div>';
+  fhtml+='<div class="cf-i"><span class="cf-l">AVG TEMP</span><span class="cf-v">'+avgF+'°F</span></div>';
+  fhtml+='<div class="cf-i"><span class="cf-l">AVG HUM</span><span class="cf-v">'+avgH+'%</span></div>';
+  fhtml+='<div class="cf-i"><span class="cf-l">ALERTS</span><span class="cf-v '+(alts>0?'red':'green')+'">'+alts+'</span></div>';
+  if(tot>1) fhtml+='<div class="cf-i"><span class="cf-l">PAGE</span><span class="cf-v">'+(pg+1)+'/'+tot+'</span></div>';
+  document.getElementById('clin-footer').innerHTML=fhtml;
+}
+
+// ═══════════════════════════════════════════════════════
+// SUMMARY BAR
+// ═══════════════════════════════════════════════════════
+function renderSummary() {
+  const pills=document.getElementById('sb-pills');
+  const sysEl=document.getElementById('sb-sys');
+  if(!pills) return;
+  let h='';
+  nodes.forEach(n=>{
+    const sc=n.conn?n.status:'offl';
+    const sh=(n.name.split('—')[1]||n.name).trim();
+    let valText, valColor;
+    if(!n.conn){
+      valText='OFFLINE'; valColor='neutral';
+    } else if(n.type==='vitals'){
+      valText=n.finger?(n.bpm+' BPM'):'—';
+      valColor=n.finger?bpmCl(n.bpm):'neutral';
+    } else {
+      const f=parseFloat(c2f(n.temp));
+      valText=c2f(n.temp)+'°F';
+      valColor=tcl(f);
+    }
+    h+='<div class="sb-pill '+sc+'" data-action="jump" data-id="'+n.id+'">';
+    h+='<div class="sb-dot '+sc+'"></div>';
+    h+='<span class="sb-name">'+sh+'</span>';
+    h+='<span class="sb-temp '+valColor+'">'+valText+'</span>';
+    h+='</div>';
+  });
+  pills.innerHTML=h;
+  const sys=nodes.some(n=>n.status==='red')?'red':nodes.some(n=>n.status==='amber')?'amber':'green';
+  sysEl.className=sys;
+  sysEl.textContent=sys==='red'?'ALERT':sys==='amber'?'WARNING':'NORMAL';
+}
+function jumpTo(id) {
+  const p=Math.floor((id-1)/PER_PAGE);
+  if(p!==pg){pg=p;renderClinical();renderDots();}
+  setTimeout(()=>{
+    const cards=document.querySelectorAll('.zcard');
+    const idx=(id-1)%PER_PAGE;
+    if(cards[idx]) cards[idx].scrollIntoView({behavior:'smooth',block:'nearest'});
+  },80);
+}
+
+// ═══════════════════════════════════════════════════════
+// IT VIEW
+// ═══════════════════════════════════════════════════════
+function renderIT() {
+  const on=nodes.filter(n=>n.conn);
+  document.getElementById('ms-on').textContent=on.length;
+  document.getElementById('ms-rs').textContent=on.length?Math.round(on.reduce((s,n)=>s+n.rssi,0)/on.length)+' dB':'—';
+  document.getElementById('ms-pl').textContent=on.length?(on.reduce((s,n)=>s+n.pl,0)/on.length).toFixed(1)+'%':'—';
+  document.getElementById('ms-up').textContent=on.length?up2s(Math.round(on.reduce((s,n)=>s+n.up,0)/on.length)):'—';
+  let h='';
+  nodes.forEach(n=>{
+    const isOp = openSetIT.has(n.id);
+    const sc   = n.conn ? (n.rssi>-60?'green':n.rssi>-80?'amber':'red') : 'offl';
+    // Main card row
+    h+='<div class="ncard" data-action="detail-it" data-id="'+n.id+'">';
+    h+='<div class="ncard-row">';
+    h+='<div class="nid">'+n.nodeId+'</div>';
+    h+='<div><div class="nname">'+n.nodeName+' — '+n.name+'</div>';
+    h+='<div class="nmeta">'+n.tier+' · '+up2s(n.up)+' · '+ago(n.seen)+'</div></div>';
+    h+='<div class="nsigs">';
+    h+='<div class="spill '+rcl(n.rssi)+'">RSSI '+n.rssi+' dB</div>';
+    h+='<div class="spill '+pcl(n.pl)+'">PKT '+n.pl+'%</div>';
+    h+='<div class="spill '+(n.snr>4?'g':n.snr>2?'w':'b')+'">SNR '+n.snr+' dB</div>';
+    h+='</div>';
+    h+='<div class="batwrap">';
+    h+='<div class="baticon"><div class="batfill" style="width:'+Math.round(n.bat)+'%;background:'+bcl(n.bat)+'"></div></div>';
+    h+='<div class="batpct">'+Math.round(n.bat)+'%</div>';
+    h+='</div>';
+    h+='</div>'; // end ncard-row
+    // Expand button
+    h+='<button class="ncard-expand'+(isOp?' open':'')+'" data-action="detail-it" data-id="'+n.id+'">';
+    h+=isOp?'▲ CLOSE':'▼ DETAILS';
+    h+='</button>';
+    // Detail panel
+    h+='<div class="ncard-detail'+(isOp?' open':'')+'">';
+    h+='<div class="ndet-grid">';
+    h+='<div class="ndet-box"><div class="ndet-lbl">NODE ID</div><div class="ndet-val" style="font-size:11px;color:var(--teal)">'+n.nodeId+'</div></div>';
+    if(n.type==='vitals'){
+      h+='<div class="ndet-box"><div class="ndet-lbl">BPM</div><div class="ndet-val '+(n.finger?bpmCl(n.bpm):'neutral')+'">'+(n.finger?n.bpm:'—')+'</div></div>';
+      h+='<div class="ndet-box"><div class="ndet-lbl">SpO₂</div><div class="ndet-val '+(n.finger?spo2Cl(n.spo2):'neutral')+'">'+(n.finger?n.spo2+'%':'—')+'</div></div>';
+      h+='<div class="ndet-box"><div class="ndet-lbl">CONTACT</div><div class="ndet-val '+(n.finger?'green':'amber')+'">'+(n.finger?'YES':'NO')+'</div></div>';
+    } else {
+      h+='<div class="ndet-box"><div class="ndet-lbl">VOC INDEX</div><div class="ndet-val '+(n.voc>.9?'red':n.voc>.6?'amber':'green')+'">'+n.voc+' mg/m³</div></div>';
+      h+='<div class="ndet-box"><div class="ndet-lbl">TEMPERATURE</div><div class="ndet-val">'+c2f(n.temp)+'°F</div></div>';
+      h+='<div class="ndet-box"><div class="ndet-lbl">HUMIDITY</div><div class="ndet-val">'+n.hum+'%</div></div>';
+    }
+    h+='</div>';
+    // Next steps IT mode
+    h+=nsHtml(n);
+    h+='</div>'; // end ncard-detail
+    h+='</div>'; // end ncard
+  });
+  document.getElementById('ncards').innerHTML=h;
+  renderLog();
+}
+function renderLog() {
+  const b=document.getElementById('elog-body'); if(!b) return;
+  if(!LOG.length){b.innerHTML='<div style="padding:14px;text-align:center;font-family:\'IBM Plex Mono\',monospace;font-size:11px;color:var(--tx4)">No events yet</div>';return;}
+  let h='';
+  LOG.forEach(e=>{
+    h+='<div class="elog-row">';
+    h+='<span class="elog-t">'+t2s(e.t)+'</span>';
+    h+='<span class="elog-ty '+e.type+'">'+e.type+'</span>';
+    h+='<span class="elog-z">'+e.zone+'</span>';
+    h+='<span class="elog-m">'+e.msg+'</span>';
+    h+='</div>';
+  });
+  b.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════════
+// ROTATION
+// ═══════════════════════════════════════════════════════
+function totPg(){return Math.max(1,Math.ceil(nodes.length/PER_PAGE));}
+function toggleRotBar(){
+  rotShown=!rotShown;
+  document.getElementById('rot-bar').classList.toggle('hidden',!rotShown||mode!=='clinical');
+  if(rotShown&&totPg()>1&&!rotOn){rotOn=true;updRotBtn();startRot();}
+  renderDots();
+}
+function setDwell(s){
+  dwell=s;
+  document.querySelectorAll('.dw').forEach(b=>b.classList.toggle('on',parseInt(b.textContent)===s));
+  if(rotOn){stopRot();startRot();}
+}
+function toggleRot(){rotOn=!rotOn;if(rotOn)startRot();else stopRot();updRotBtn();}
+function updRotBtn(){
+  const b=document.getElementById('rot-btn');if(!b)return;
+  b.textContent=rotOn?'⏸ PAUSE':'▶ RESUME';
+  b.className=rotOn?'':'paused';
+}
+function startRot(){
+  stopRot();
+  const f=document.getElementById('rot-fill');
+  if(f){f.className='rot-fill';f.style.width='0%';
+    requestAnimationFrame(()=>{f.className='rot-fill go';f.style.transition='width '+dwell+'s linear';f.style.width='100%';});}
+  rotTimer=setTimeout(()=>{pg=(pg+1)%totPg();renderClinical();renderDots();if(rotOn)startRot();},dwell*1000);
+}
+function stopRot(){
+  if(rotTimer){clearTimeout(rotTimer);rotTimer=null;}
+  const f=document.getElementById('rot-fill');
+  if(f){f.className='rot-fill';f.style.width='0%';}
+}
+function renderDots(){
+  const c=document.getElementById('pdots');if(!c)return;
+  let h='';
+  for(let i=0;i<totPg();i++) h+='<div class="pdot'+(i===pg?' on':'')+'" data-action="page" data-pg="'+i+'"></div>';
+  c.innerHTML=h;
+}
+function goPg(p){pg=p;renderClinical();renderDots();if(rotOn){stopRot();startRot();}}
+
+// ═══════════════════════════════════════════════════════
+// SWIPE
+// ═══════════════════════════════════════════════════════
+let tx=0,ty=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{
+  if(mode!=='clinical'||totPg()<=1)return;
+  const dx=e.changedTouches[0].clientX-tx,dy=e.changedTouches[0].clientY-ty;
+  if(Math.abs(dx)>Math.abs(dy)&&Math.abs(dx)>40){
+    pg=(pg+(dx<0?1:-1)+totPg())%totPg();renderClinical();renderDots();
+    if(rotOn){stopRot();startRot();}
+  }
+},{passive:true});
+
+// ═══════════════════════════════════════════════════════
+// MODE
+// ═══════════════════════════════════════════════════════
+function setMode(m){
+  mode=m;
+  document.querySelectorAll('.mbtn').forEach((b,i)=>b.classList.toggle('on',['clinical','it','setup'][i]===m));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.getElementById('v-'+m).classList.add('on');
+  document.getElementById('summary-bar').classList.toggle('hidden',m!=='clinical');
+  document.getElementById('rot-bar').classList.toggle('hidden',m!=='clinical'||!rotShown);
+  if(m==='clinical'){renderClinical();renderSummary();}
+  else if(m==='it') renderIT();
+}
+
+// ═══════════════════════════════════════════════════════
+// WEBSOCKET
+// ═══════════════════════════════════════════════════════
+function wsConnect(){
+  if(location.protocol==='https:'){
+    addLog('SYSTEM','INFO','HTTPS mode — WebSocket disabled. Running simulation.');
+    return;
+  }
+  try{
+    wsConn=new WebSocket(WS_URL);
+    wsConn.onopen=()=>{setConn('live');stopSim();addLog('SYSTEM','START','WebSocket connected — live Plexus data active');};
+    wsConn.onmessage=e=>{try{
+      const d=JSON.parse(e.data);
+      if(d.id>=1&&d.id<=nodes.length){
+        const i=d.id-1,old={...nodes[i]};
+        nodes[i]={...nodes[i],...d,conn:true,seen:new Date()};
+        // Update history: BPM for vitals nodes, temp for env nodes
+        if(nodes[i].type==='vitals'&&d.bpm) nodes[i].hist=[...nodes[i].hist.slice(-6),d.bpm];
+        else if(d.temp) nodes[i].hist=[...nodes[i].hist.slice(-6),d.temp];
+        nodes[i].status=calcStatus(nodes[i]);
+        if(old.status!==nodes[i].status) addLog(nodes[i].name,'STATUS',old.status+' → '+nodes[i].status);
+        renderAll();
+      }}catch(err){}};
+    wsConn.onclose=()=>{setConn('sim');startSim();setTimeout(wsConnect,4000);};
+    wsConn.onerror=()=>wsConn.close();
+  }catch(e){setConn('sim');startSim();setTimeout(wsConnect,4000);}
+}
+function setConn(s){
+  document.getElementById('cdot').className='cdot '+s;
+  document.getElementById('clbl').textContent=s==='live'?'LIVE':'SIMULATION';
+  document.getElementById('sim-banner').classList.toggle('hidden',s==='live');
+}
+
+// ═══════════════════════════════════════════════════════
+// SIMULATION
+// ═══════════════════════════════════════════════════════
+function startSim(){if(!simTimer)simTimer=setInterval(tick,3500);}
+function stopSim(){if(simTimer){clearInterval(simTimer);simTimer=null;}}
+function tick(){
+  nodes=nodes.map(n=>{
+    const rssi=Math.round(n.rssi+(Math.random()-.5)*3);
+    const snr=+(n.snr+(Math.random()-.5)*.3).toFixed(1);
+    const pl=+(Math.max(0,n.pl+(Math.random()-.5)*.2)).toFixed(1);
+    const bat=Math.max(5,Math.min(100,n.bat+(Math.random()-.5)*.1));
+    let nn;
+
+    if(n.type==='vitals') {
+      // Simulate realistic BPM drift (stays near resting 72 BPM)
+      const bpm=Math.round(Math.max(40,Math.min(140,n.bpm+(Math.random()-.5)*3)));
+      // SpO2 stays near 98%, occasional dip
+      const spo2=Math.round(Math.max(85,Math.min(100,n.spo2+(Math.random()-.48)*.4)));
+      // Finger occasionally lost in simulation
+      const finger=Math.random()>.97?!n.finger:n.finger;
+      const hist=[...n.hist.slice(-6),bpm];
+      nn={...n,bpm,spo2,finger,rssi,snr,pl,bat,hist,up:n.up+3,seen:new Date()};
+      const old=n.status; nn.status=calcStatus(nn);
+      if(old!==nn.status) addLog(nn.name,'STATUS',old+' → '+nn.status);
+      if(bpm>120&&n.bpm<=120) addLog(nn.name,'ALERT','Heart rate exceeded 120 BPM');
+      if(bpm<50&&n.bpm>=50)   addLog(nn.name,'ALERT','Heart rate below 50 BPM');
+      if(spo2<94&&n.spo2>=94) addLog(nn.name,'ALERT','SpO2 below 94%');
+      if(!finger&&n.finger)    addLog(nn.name,'WARN', 'Finger contact lost');
+      if(finger&&!n.finger)    addLog(nn.name,'INFO', 'Finger contact restored');
+    } else {
+      const temp=+(n.temp+(Math.random()-.5)*.3).toFixed(1);
+      const hum=Math.round(Math.max(30,Math.min(75,n.hum+(Math.random()-.5)*2)));
+      const pres=+(n.pres+(Math.random()-.5)*.5).toFixed(1);
+      const voc=+(Math.max(.1,Math.min(1.5,n.voc+(Math.random()-.5)*.05))).toFixed(2);
+      const occ=Math.random()>.95?!n.occ:n.occ;
+      const hist=[...n.hist.slice(-6),temp];
+      nn={...n,temp,hum,pres,voc,rssi,snr,pl,bat,occ,hist,up:n.up+3,seen:new Date()};
+      const old=n.status; nn.status=calcStatus(nn);
+      if(old!==nn.status) addLog(nn.name,'STATUS',old+' → '+nn.status);
+      if(parseFloat(c2f(temp))>82&&parseFloat(c2f(n.temp))<=82) addLog(nn.name,'ALERT','Temp exceeded 82°F');
+      if(hum>68&&n.hum<=68) addLog(nn.name,'ALERT','Humidity exceeded 68%');
+    }
+    return nn;
+  });
+  renderAll();
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════════════════════
+function renderAll(){
+  if(mode==='clinical'){renderClinical();renderSummary();}
+  else if(mode==='it') renderIT();
+  renderDots();
+}
+
+// ═══════════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════════
+function toggleTheme(){
+  theme=theme==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',theme);
+  document.getElementById('tbtn').textContent=theme==='dark'?'🌙':'☀️';
+}
+function clearLog(){LOG=[];addLog('SYSTEM','INFO','Log cleared');}
+function exportLog(){
+  const lines=['Time,Zone,Type,Event'];
+  LOG.forEach(e=>lines.push([t2s(e.t),e.zone,e.type,'"'+e.msg+'"'].join(',')));
+  const a=Object.assign(document.createElement('a'),{
+    href:URL.createObjectURL(new Blob([lines.join('\n')],{type:'text/csv'})),
+    download:'milieu-'+new Date().toISOString().slice(0,10)+'.csv'});
+  a.click();URL.revokeObjectURL(a.href);
+  addLog('SYSTEM','EXPORT','Event log exported');
+}
+function updClock(){
+  const e=document.getElementById('clk');
+  if(e) e.textContent=new Date().toLocaleTimeString('en-US',{hour12:false,hour:'2-digit',minute:'2-digit'});
+}
+async function wakeLock(){try{if('wakeLock' in navigator)await navigator.wakeLock.request('screen');}catch(e){}}
+
+
+
+// ═══════════════════════════════════════════════════════
+// DEMO ALARM — simulates a zone going critical and recovering
+// ═══════════════════════════════════════════════════════
+var demoTimer = null;
+function triggerDemoAlarm() {
+  if(demoTimer) return; // already running
+
+  var btn   = document.getElementById('demo-btn');
+  var toast = document.getElementById('demo-toast');
+
+  // Pick a random env node to alarm (not vitals)
+  var envNodes = nodes.filter(function(n){ return n.type !== 'vitals' && n.conn; });
+  if(!envNodes.length) return;
+  var target = envNodes[Math.floor(Math.random() * envNodes.length)];
+  var idx    = nodes.findIndex(function(n){ return n.id === target.id; });
+
+  // Save original values
+  var origTemp   = nodes[idx].temp;
+  var origStatus = nodes[idx].status;
+
+  // Spike temp to trigger red threshold (>82°F = >27.8°C)
+  nodes[idx].temp   = 28.2;
+  nodes[idx].status = 'red';
+  nodes[idx].seen   = new Date();
+
+  addLog(nodes[idx].name, 'ALERT', 'DEMO — Temperature critical: ' + c2f(nodes[idx].temp) + '°F');
+
+  // Visual feedback
+  btn.classList.add('alarming');
+  btn.textContent = '🔴';
+  toast.classList.add('show');
+  toast.textContent = 'DEMO ALARM — ' + nodes[idx].name + ' — auto-clearing in 8s';
+
+  renderAll();
+
+  // Auto-recover after 8 seconds
+  demoTimer = setTimeout(function() {
+    nodes[idx].temp   = origTemp;
+    nodes[idx].status = calcStatus(nodes[idx]);
+    nodes[idx].seen   = new Date();
+    addLog(nodes[idx].name, 'STATUS', 'DEMO — Alarm cleared, returning to normal');
+
+    btn.classList.remove('alarming');
+    btn.textContent = '🚨';
+    toast.classList.remove('show');
+    demoTimer = null;
+    renderAll();
+  }, 8000);
+}
+
+// ═══════════════════════════════════════════════════════
+// EVENT LISTENERS — all click handling, no inline onclick
+// ═══════════════════════════════════════════════════════
+function initEvents() {
+  function on(id,ev,fn){var e=document.getElementById(id);if(e)e.addEventListener(ev,fn);}
+  function onq(sel,ev,fn){var e=document.querySelector(sel);if(e)e.addEventListener(ev,fn);}
+  function del(id,attr,fn){
+    var el=document.getElementById(id);if(!el)return;
+    el.addEventListener('click',function(e){var t=e.target.closest('['+attr+']');if(t)fn(t);});
+  }
+  onq('.mtog','click',function(e){var b=e.target.closest('[data-mode]');if(b)setMode(b.dataset.mode);});
+  onq('.dwell-wrap','click',function(e){var b=e.target.closest('[data-dwell]');if(b)setDwell(parseInt(b.dataset.dwell));});
+  on('rot-btn',    'click',toggleRot);
+  on('rot-bar-btn','click',toggleRotBar);
+  on('tbtn',       'click',toggleTheme);
+  on('export-btn', 'click',exportLog);
+  on('clear-btn',  'click',clearLog);
+  del('clin-grid','data-action',function(t){if(t.dataset.action==='detail'){var id=parseInt(t.dataset.id);if(!isNaN(id))toggleDetail(id);}});
+  del('sb-pills','data-action',function(t){if(t.dataset.action==='jump'){var id=parseInt(t.dataset.id);if(!isNaN(id))jumpTo(id);}});
+  del('pdots','data-action',function(t){if(t.dataset.action==='page'){var p=parseInt(t.dataset.pg);if(!isNaN(p))goPg(p);}});
+  del('ncards','data-action',function(t){if(t.dataset.action==='detail-it'){var id=parseInt(t.dataset.id);if(!isNaN(id))toggleDetailIT(id);}});
+  on('demo-btn','click',triggerDemoAlarm);
+}
+
+// ═══════════════════════════════════════════════════════
+// BOOT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',function(){
+addLog('SYSTEM','START','Milieu by Aethelis v0.5 initialized');
+addLog('SYSTEM','INFO','Aethelis Plexus — 4 Ganglia registered');
+addLog('Zone 1','INFO','AETH Hub (!04083034) — Tier 1 OR Suite');
+addLog('Zone 2','INFO','Aeth-Frank (!0400d1b0) — Tier 1 ICU Bay');
+addLog('Zone 3','INFO','Aeth-Beans (!04009d18) — Tier 2 Pharmacy');
+addLog('Vitals','INFO','Cardputer (PENDING) — MAX30102 Heart Rate + SpO2');
+addLog('SYSTEM','INFO','WebSocket listening on ws://localhost:8765');
+initEvents();
+setConn('sim');
+startSim();
+renderClinical();
+renderSummary();
+renderDots();
+updClock();
+setInterval(updClock,30000);
+setInterval(()=>{if(mode==='clinical')renderClinical();},15000);
+wsConnect();
+wakeLock();
+});
+</script>
+
+<!-- Demo alarm button — bottom right corner -->
+<button id="demo-btn" title="Demo: trigger alarm">🚨</button>
+<div id="demo-toast">DEMO ALARM — auto-clearing in 8s</div>
+
+</body>
+</html>
